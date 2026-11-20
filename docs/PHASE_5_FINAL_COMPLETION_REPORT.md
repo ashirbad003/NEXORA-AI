@@ -15,11 +15,11 @@ Phase 5 (Coding Arena & Isolated Sandbox Worker) implementation is completely fi
 
 All mandatory completion gates were evaluated and passed:
 - **Backend Coding Architecture:** 100% complete (Problem Catalog, Split IDE, Multi-Language Runners, Test Evaluator, Streak Tracking).
-- **Database Schema:** 4 tables added via forward-only Alembic migration `92c890123def`. 17 total tables, 52 indexes, and 17 foreign keys verified on PostgreSQL 17 (`nexora_dev`).
+- **Database Schema:** 4 tables added via forward-only Alembic migration `92c890123def`. 17 total tables, 52 indexes, and 17 foreign keys verified on PostgreSQL 17 (`nexora_dev`). Default problems and test cases seeded.
 - **Docker Engine Operational Status:** Docker Engine `29.9.3` operational via WSL2 backend on Windows host.
 - **Isolated Multi-Language Runners:** Python 3 (`python:3.11-alpine`), Java 17 (`eclipse-temurin:17-alpine`), C and C++ (`gcc:13-bookworm`) executing in disposable containers with `--network none`, `--read-only`, and resource limits.
 - **Fail-Closed Sandbox Security:** Arbitrary host-level code execution is strictly prohibited. Verified via baseline security tests.
-- **Verdict:** Upgraded to **FULL GO**.
+- **Verdict:** Formally certified as **FULL GO**.
 
 ---
 
@@ -30,13 +30,14 @@ All mandatory completion gates were evaluated and passed:
 | **Coding Problem Models & Schemas** | Scaffolded | Implemented | Implemented & Verified | **COMPLETE** |
 | **Alembic Migration** | `639a0bda8ebc` | `92c890123def` | `92c890123def` (Head) | **APPLIED & VERIFIED** |
 | **PostgreSQL 17 Tables** | 13 tables | 17 tables | 17 tables (4 new Phase 5) | **VERIFIED** |
+| **Database Seeding** | 0 problems | 0 problems | 3 problems, 11 test cases | **SEEDED & VERIFIED** |
 | **Frontend Split IDE Workspace** | Scaffolded | Implemented | Implemented (`/coding/[slug]`) | **COMPLETE** |
 | **Problem Catalog UI** | Scaffolded | Implemented | Implemented (`/coding`) | **COMPLETE** |
 | **Sandbox Execution Supervisor** | Unhardened | Fail-Closed | Multi-Language Container Runner | **VERIFIED** |
 | **Docker Daemon Availability** | Offline | Offline | Active & Operational | **ACTIVE** |
 | **Live Container Execution (Py, Java, C, C++)** | Blocked | Blocked | Verified in live containers | **ALL 4 PASSING** |
 | **Host Subprocess Fallback** | Possible | Prohibited | Strictly Prohibited | **BLOCKED (FAIL-CLOSED)** |
-| **Backend Integration Tests** | 0 Phase 5 tests | 9 tests | 16 tests (9 baseline/integ + 7 live container) | **ALL PASSED** |
+| **Backend Integration Tests** | 0 Phase 5 tests | 9 tests | 23 tests (9 baseline/integ + 14 live container) | **ALL PASSED** |
 | **Full Regression Suite** | 64 tests | 69 tests | 69 tests | **69/69 PASSED** |
 | **TypeScript Typecheck** | 0 errors | 0 errors | 0 errors | **0 ERRORS** |
 | **Next.js Production Build** | 8 routes | 10 routes | 10 routes prerendered | **10/10 PRERENDERED** |

@@ -121,7 +121,7 @@ class ProcessIsolatedSandbox:
             pipe_stdin = stdin_input
         elif language == "java":
             script = "cat << 'NEXORA_EOF' > /tmp/Solution.java\n" + code + "\nNEXORA_EOF\n" \
-                     "javac /tmp/Solution.java && java -Xmx128m -cp /tmp Solution"
+                     "java -XX:+TieredCompilation -XX:TieredStopAtLevel=1 -Xmx128m /tmp/Solution.java"
             container_cmd = ["sh", "-c", script]
             pipe_stdin = stdin_input
         else:

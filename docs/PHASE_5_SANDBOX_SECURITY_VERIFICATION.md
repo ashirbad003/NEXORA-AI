@@ -52,10 +52,12 @@ The NEXORA AI Coding Arena sandbox architecture protects host systems, credentia
 3. **Filesystem Immutability (`--read-only` + `--tmpfs`):**
    - The root container filesystem is read-only.
    - Compilation and execution occur inside an isolated, non-persistent memory tmpfs (`/tmp`).
-   - Host volumes are NEVER mounted into the container.
-4. **Time Limits:**
+   - Host volumes and Docker socket are NEVER mounted into the container.
+4. **Credential & Environment Protection:**
+   - Container processes receive zero host environment variables, ensuring database passwords, JWT secrets, and API keys are completely shielded.
+5. **Time Limits:**
    - 3-second hard timeout for production requests.
-5. **Fail-Closed Host Subprocess Prohibition:**
+6. **Fail-Closed Host Subprocess Prohibition:**
    - If Docker is offline or disabled, code execution is immediately rejected with an explicit security policy message. Under NO circumstances does the sandbox fall back to host subprocess execution.
 
 ---
@@ -65,12 +67,19 @@ The NEXORA AI Coding Arena sandbox architecture protects host systems, credentia
 | Test Case | Description | Result | Evidence |
 | :--- | :--- | :--- | :--- |
 | **test_python_container_execution** | Python 3.11 inside `python:3.11-alpine` | **PASS** | Exit code 0, status `COMPLETED`, isolation `docker_container` |
+| **test_python_compilation_or_syntax_error** | Python syntax error detection | **PASS** | Status `RUNTIME_ERROR`, exit code != 0, stderr captured |
 | **test_c_container_execution** | C (GCC) inside `gcc:13-bookworm` | **PASS** | Exit code 0, status `COMPLETED`, isolation `docker_container` |
+| **test_c_compilation_error** | C syntax/compilation error detection | **PASS** | Status `RUNTIME_ERROR`, compilation error caught |
 | **test_cpp_container_execution** | C++ (G++) inside `gcc:13-bookworm` | **PASS** | Exit code 0, status `COMPLETED`, isolation `docker_container` |
+| **test_cpp_compilation_error** | C++ compilation error detection | **PASS** | Status `RUNTIME_ERROR`, compilation error caught |
 | **test_java_container_execution** | Java 17 inside `eclipse-temurin:17-alpine` | **PASS** | Exit code 0, status `COMPLETED`, isolation `docker_container` |
-| **test_container_stdin_passing** | Piped stdin through isolated container | **PASS** | Verified stdin parsing and stdout streaming |
+| **test_java_compilation_error** | Java compilation error detection | **PASS** | Status `RUNTIME_ERROR`, compilation error caught |
+| **test_container_stdin_passing_python** | Piped stdin through Python container | **PASS** | Verified stdin parsing and stdout streaming |
+| **test_container_stdin_passing_c** | Piped stdin through C container | **PASS** | Verified stdin parsing and computation |
 | **test_container_timeout_enforcement** | Infinite while-loop termination | **PASS** | Status `TIME_LIMIT_EXCEEDED`, `is_timeout: true` |
 | **test_network_isolation_enforced** | Outbound socket connection attempt | **PASS** | Network unreachable, socket error caught, zero leak |
+| **test_rootfs_read_only_enforced** | Write attempt to rootfs outside /tmp | **PASS** | Read-only file system error caught, write denied |
+| **test_no_host_env_or_secret_leak** | Probe for host env vars / credentials | **PASS** | Zero host secrets exposed, status `ENV_CLEAN` |
 | **test_arbitrary_code_blocked_when_unisolated** | Execution attempted with `SANDBOX_MODE="disabled"` | **PASS** | Status `EXECUTION_BLOCKED_SECURITY_POLICY` |
 | **test_subprocess_host_fallback_prohibited** | Execution attempted with `subprocess_unsafe` | **PASS** | Host fallback refused |
 
