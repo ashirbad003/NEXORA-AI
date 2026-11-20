@@ -1,4 +1,5 @@
 import unittest
+import os
 from sandbox.worker import ProcessIsolatedSandbox
 from backend.app.core.config import settings
 
@@ -141,7 +142,6 @@ int main() {
 
     # 7. MANDATORY SECURITY BOUNDARIES
     def test_network_isolation_enforced(self):
-        # Attempting outbound socket must fail closed with error
         code = """import urllib.request
 try:
     urllib.request.urlopen('http://1.1.1.1', timeout=1)
@@ -155,7 +155,6 @@ except Exception as e:
         self.assertNotIn("NET_LEAK", res["stdout"])
 
     def test_rootfs_read_only_enforced(self):
-        # Writing outside writable /tmp must fail due to read-only filesystem
         code = """try:
     with open('/root/escape_probe.txt', 'w') as f:
         f.write('tampered')
@@ -169,7 +168,6 @@ except Exception:
         self.assertNotIn("WRITE_ALLOWED", res["stdout"])
 
     def test_no_host_env_or_secret_leak(self):
-        # Check that host secrets / DB credentials are not in container env
         code = """import os
 leak = [k for k in os.environ if 'POSTGRES' in k or 'SECRET' in k or 'JWT' in k]
 if leak:
@@ -180,6 +178,65 @@ else:
         res = self.sandbox.execute("python", code)
         self.assertEqual(res["status"], "COMPLETED")
         self.assertIn("ENV_CLEAN", res["stdout"])
+
+    # 8. HARDENED NON-ROOT EXECUTION AND ATTACK TESTS
+    def test_non_root_uid_python(self):
+        code = "import os; print(f'UID:{os.getuid()},GID:{os.getgid()}')"
+        res = self.sandbox.execute("python", code)
+        self.assertEqual(res["status"], "COMPLETED")
+        self.assertIn("UID:1000", res["stdout"])
+        self.assertIn("GID:1000", res["stdout"])
+
+    def test_non_root_uid_c(self):
+        code = """#include <stdio.h>
+#include <unistd.h>
+int main() {
+    printf("UID:%d,GID:%d\\n", getuid(), getgid());
+    return 0;
+}
+"""
+        res = self.sandbox.execute("c", code)
+        self.assertEqual(res["status"], "COMPLETED")
+        self.assertIn("UID:1000", res["stdout"])
+        self.assertIn("GID:1000", res["stdout"])
+
+    def test_root_privilege_escalation_denied(self):
+        code = """import os
+try:
+    os.setuid(0)
+    print('ESCALATION_SUCCEEDED')
+except PermissionError:
+    print('ESCALATION_BLOCKED')
+"""
+        res = self.sandbox.execute("python", code)
+        self.assertEqual(res["status"], "COMPLETED")
+        self.assertIn("ESCALATION_BLOCKED", res["stdout"])
+        self.assertNotIn("ESCALATION_SUCCEEDED", res["stdout"])
+
+    def test_docker_socket_not_accessible(self):
+        code = """import os
+if os.path.exists('/var/run/docker.sock'):
+    print('SOCKET_EXPOSED')
+else:
+    print('SOCKET_PROTECTED')
+"""
+        res = self.sandbox.execute("python", code)
+        self.assertEqual(res["status"], "COMPLETED")
+        self.assertIn("SOCKET_PROTECTED", res["stdout"])
+
+    def test_fork_bomb_mitigation(self):
+        # Fork bomb should be arrested by pids-limit=64 and return without crashing host
+        sandbox_short = ProcessIsolatedSandbox(timeout_seconds=2)
+        code = """import os
+try:
+    while True:
+        os.fork()
+except Exception as e:
+    print('FORK_BLOCKED')
+"""
+        res = sandbox_short.execute("python", code)
+        # Process will either hit process limit or timeout safely
+        self.assertTrue(res["status"] in ("TIME_LIMIT_EXCEEDED", "COMPLETED", "RUNTIME_ERROR"))
 
 if __name__ == "__main__":
     unittest.main()

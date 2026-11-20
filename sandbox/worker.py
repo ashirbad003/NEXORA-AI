@@ -140,12 +140,13 @@ class ProcessIsolatedSandbox:
         try:
             cmd = [
                 "docker", "run", "--rm", "-i",
+                "--user", "1000:1000",
                 "--network", "none",
                 "--memory", "256m",
                 "--cpus", "0.5",
                 "--pids-limit", "64",
                 "--read-only",
-                "--tmpfs", "/tmp:rw,exec,size=64m",
+                "--tmpfs", "/tmp:rw,exec,size=64m,mode=1777",
                 image
             ] + container_cmd
 
