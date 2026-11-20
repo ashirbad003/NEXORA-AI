@@ -6,9 +6,13 @@ const nextConfig = {
     NEXT_PUBLIC_APP_NAME: 'NEXORA AI',
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1',
   },
-  webpack: (config, { isServer }) => {
+  webpack: (config, { isServer, dev }) => {
     // Disable symlink resolution on FAT32 filesystems where readlink throws EISDIR
     config.resolve.symlinks = false;
+    // Disable persistent packfile cache to prevent FAT32 snapshot resolution warnings
+    if (!dev) {
+      config.cache = false;
+    }
     return config;
   }
 };
