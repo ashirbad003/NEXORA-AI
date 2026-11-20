@@ -64,24 +64,24 @@
 | FEAT-060 | ASSESS | Assessment Intelligence | Assessment Retake Policy Controller | `/api/v1/assess/...` | `db_assess` | `/assess` | `test_assess_060` |
 | FEAT-061 | ASSESS | Assessment Intelligence | Assessment Certificate Generator | `/api/v1/assess/...` | `db_assess` | `/assess` | `test_assess_061` |
 | FEAT-062 | ASSESS | Assessment Intelligence | Mock Drive Assessment Mode | `/api/v1/assess/...` | `db_assess` | `/assess` | `test_assess_062` |
-| FEAT-063 | CODING | Coding Arena | Monaco-Based Online Code Editor | `/api/v1/coding/...` | `db_coding` | `/coding` | `test_coding_063` |
-| FEAT-064 | CODING | Coding Arena | Multi-Language Runtime Support | `/api/v1/coding/...` | `db_coding` | `/coding` | `test_coding_064` |
-| FEAT-065 | CODING | Coding Arena | Problem Catalog Browser | `/api/v1/coding/...` | `db_coding` | `/coding` | `test_coding_065` |
-| FEAT-066 | CODING | Coding Arena | Company-Wise Problem Filtering | `/api/v1/coding/...` | `db_coding` | `/coding` | `test_coding_066` |
-| FEAT-067 | CODING | Coding Arena | Public Test Case Execution | `/api/v1/coding/...` | `db_coding` | `/coding` | `test_coding_067` |
-| FEAT-068 | CODING | Coding Arena | Hidden Test Case Evaluation | `/api/v1/coding/...` | `db_coding` | `/coding` | `test_coding_068` |
-| FEAT-069 | CODING | Coding Arena | Process-Isolated Execution Sandbox | `/api/v1/coding/...` | `db_coding` | `/coding` | `test_coding_069` |
-| FEAT-070 | CODING | Coding Arena | Strict Execution Timeouts | `/api/v1/coding/...` | `db_coding` | `/coding` | `test_coding_070` |
-| FEAT-071 | CODING | Coding Arena | Memory Limit Ceilings | `/api/v1/coding/...` | `db_coding` | `/coding` | `test_coding_071` |
-| FEAT-072 | CODING | Coding Arena | Sanitized Output & Error Formatter | `/api/v1/coding/...` | `db_coding` | `/coding` | `test_coding_072` |
-| FEAT-073 | CODING | Coding Arena | Detailed Submission History | `/api/v1/coding/...` | `db_coding` | `/coding` | `test_coding_073` |
-| FEAT-074 | CODING | Coding Arena | Coding Streak & Activity Tracker | `/api/v1/coding/...` | `db_coding` | `/coding` | `test_coding_074` |
+| FEAT-063 | CODING | Coding Arena | Monaco-Based Online Code Editor | /api/v1/coding/... | db_coding | /coding/[slug] | 	est_03_problem_detail_and_hidden_test_case_protection |
+| FEAT-064 | CODING | Coding Arena | Multi-Language Runtime Support | /api/v1/coding/problems/{slug}/run | db_coding | /coding/[slug] | 	est_04_run_custom_input_unisolated_safeguard |
+| FEAT-065 | CODING | Coding Arena | Problem Catalog Browser | /api/v1/coding/problems | coding_problems | /coding | 	est_01_problem_catalog_listing_and_seeding |
+| FEAT-066 | CODING | Coding Arena | Company-Wise Problem Filtering | /api/v1/coding/problems?company=... | coding_problems | /coding | 	est_02_company_wise_problem_filtering |
+| FEAT-067 | CODING | Coding Arena | Public Test Case Execution | /api/v1/coding/problems/{slug}/run | problem_test_cases | /coding/[slug] | 	est_04_run_custom_input_unisolated_safeguard |
+| FEAT-068 | CODING | Coding Arena | Hidden Test Case Evaluation | /api/v1/coding/problems/{slug}/submit | problem_test_cases | /coding/[slug] | 	est_05_submission_evaluation_and_history |
+| FEAT-069 | CODING | Coding Arena | Process-Isolated Execution Sandbox | /api/v1/coding/problems/{slug}/run | sandbox | /coding/[slug] | 	est_07_sandbox_security_boundary_enforcement |
+| FEAT-070 | CODING | Coding Arena | Strict Execution Timeouts | /api/v1/coding/problems/{slug}/run | sandbox | /coding/[slug] | 	est_07_sandbox_security_boundary_enforcement |
+| FEAT-071 | CODING | Coding Arena | Memory Limit Ceilings | /api/v1/coding/problems/{slug}/run | sandbox | /coding/[slug] | 	est_07_sandbox_security_boundary_enforcement |
+| FEAT-072 | CODING | Coding Arena | Sanitized Output & Error Formatter | /api/v1/coding/problems/{slug}/run | sandbox | /coding/[slug] | 	est_04_run_custom_input_unisolated_safeguard |
+| FEAT-073 | CODING | Coding Arena | Detailed Submission History | /api/v1/coding/submissions/me | code_submissions | /coding/[slug] | 	est_05_submission_evaluation_and_history |
+| FEAT-074 | CODING | Coding Arena | Coding Streak & Activity Tracker | /api/v1/coding/stats/me | student_coding_stats | /coding | 	est_06_student_coding_statistics |
 | FEAT-075 | CODING | Coding Arena | Live Coding Contest Engine | `/api/v1/coding/...` | `db_coding` | `/coding` | `test_coding_075` |
 | FEAT-076 | CODING | Coding Arena | Editorial Solution & Discussion Tab | `/api/v1/coding/...` | `db_coding` | `/coding` | `test_coding_076` |
-| FEAT-077 | CODING | Coding Arena | Problem Custom Input Runner | `/api/v1/coding/...` | `db_coding` | `/coding` | `test_coding_077` |
+| FEAT-077 | CODING | Coding Arena | Problem Custom Input Runner | /api/v1/coding/problems/{slug}/run | sandbox | /coding/[slug] | 	est_04_run_custom_input_unisolated_safeguard |
 | FEAT-078 | CODING | Coding Arena | Plagiarism & Similarity Detection Hook | `/api/v1/coding/...` | `db_coding` | `/coding` | `test_coding_078` |
-| FEAT-079 | CODING | Coding Arena | Curated Problem Bank of 1000+ Problems | `/api/v1/coding/...` | `db_coding` | `/coding` | `test_coding_079` |
-| FEAT-080 | CODING | Coding Arena | 100+ Company Question Mappings | `/api/v1/coding/...` | `db_coding` | `/coding` | `test_coding_080` |
+| FEAT-079 | CODING | Coding Arena | Curated Problem Bank of 1000+ Problems | /api/v1/coding/problems | coding_problems | /coding | 	est_01_problem_catalog_listing_and_seeding |
+| FEAT-080 | CODING | Coding Arena | 100+ Company Question Mappings | /api/v1/coding/problems | coding_problems | /coding | 	est_02_company_wise_problem_filtering |
 | FEAT-081 | CODING | Coding Arena | Submission Runtime Distribution Graph | `/api/v1/coding/...` | `db_coding` | `/coding` | `test_coding_081` |
 | FEAT-082 | CODING | Coding Arena | Submission Memory Distribution Graph | `/api/v1/coding/...` | `db_coding` | `/coding` | `test_coding_082` |
 | FEAT-083 | CODING | Coding Arena | Multi-File Project Playground | `/api/v1/coding/...` | `db_coding` | `/coding` | `test_coding_083` |

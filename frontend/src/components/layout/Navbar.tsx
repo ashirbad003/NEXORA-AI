@@ -37,6 +37,9 @@ export function Navbar() {
           <Link href="/visualizer" className="hover:text-cyber transition-colors">
             DSA Visualizer
           </Link>
+          <Link href="/coding" className="hover:text-cyber transition-colors">
+            Coding Arena
+          </Link>
           {isAuthenticated && (
             <>
               {hasRole("STUDENT") && (

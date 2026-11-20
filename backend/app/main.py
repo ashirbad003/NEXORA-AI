@@ -7,7 +7,7 @@ import uuid
 from backend.app.core.config import settings
 from backend.app.core.logging import setup_logging, logger
 from backend.app.schemas.auth import HealthResponse
-from backend.app.api import auth, students, admin, placement, learning
+from backend.app.api import auth, students, admin, placement, learning, coding
 
 def create_app() -> FastAPI:
     setup_logging(debug=settings.APP_DEBUG)
@@ -62,6 +62,7 @@ def create_app() -> FastAPI:
     app.include_router(admin.router, prefix=settings.API_V1_STR)
     app.include_router(placement.router, prefix=settings.API_V1_STR)
     app.include_router(learning.router, prefix=settings.API_V1_STR)
+    app.include_router(coding.router, prefix=settings.API_V1_STR)
 
     # Health Check Endpoints
     @app.get("/health/live", tags=["System"])
