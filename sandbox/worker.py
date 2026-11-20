@@ -141,6 +141,8 @@ class ProcessIsolatedSandbox:
             cmd = [
                 "docker", "run", "--rm", "-i",
                 "--user", "1000:1000",
+                "--cap-drop=ALL",
+                "--security-opt=no-new-privileges:true",
                 "--network", "none",
                 "--memory", "256m",
                 "--cpus", "0.5",

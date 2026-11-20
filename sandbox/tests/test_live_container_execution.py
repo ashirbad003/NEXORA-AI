@@ -238,5 +238,28 @@ except Exception as e:
         # Process will either hit process limit or timeout safely
         self.assertTrue(res["status"] in ("TIME_LIMIT_EXCEEDED", "COMPLETED", "RUNTIME_ERROR"))
 
+    def test_linux_capabilities_dropped(self):
+        # Verify bounding set of capabilities has been dropped (--cap-drop=ALL)
+        code = """import os
+try:
+    with open('/proc/1/status', 'r') as f:
+        content = f.read()
+    # CapEff / CapBnd should be zeroed
+    for line in content.splitlines():
+        if line.startswith('CapBnd:') or line.startswith('CapEff:'):
+            val = line.split(':')[1].strip()
+            if val == '0000000000000000':
+                print(f"{line.split(':')[0]}:ZEROED")
+            else:
+                print(f"{line.split(':')[0]}:{val}")
+except Exception as e:
+    print(f"ERROR:{e}")
+"""
+        res = self.sandbox.execute("python", code)
+        self.assertEqual(res["status"], "COMPLETED")
+        self.assertIn("CapBnd:ZEROED", res["stdout"])
+        self.assertIn("CapEff:ZEROED", res["stdout"])
+
+
 if __name__ == "__main__":
     unittest.main()
