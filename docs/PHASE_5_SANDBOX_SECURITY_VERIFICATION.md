@@ -3,7 +3,7 @@
 **Workspace:** `E:\NEXORA_AI`  
 **Date:** November 20, 2026  
 **Auditor:** Principal DevSecOps & Security Architect  
-**Subject:** Coding Arena Sandbox Supervisor (`sandbox/worker.py`) Security Posture  
+**Subject:** Coding Arena Sandbox Supervisor (`sandbox/worker.py`) Security Posture & Live Container Isolation  
 
 ---
 
@@ -30,11 +30,12 @@ The NEXORA AI Coding Arena sandbox architecture protects host systems, credentia
     [Disposable Docker Container]
       ├── Flag: --rm (Instant self-destruction upon completion)
       ├── Flag: --network none (Zero LAN / Internet / Host access)
-      ├── Flag: --memory 128m (Hard memory ceiling against OOM)
+      ├── Flag: --memory 256m (Hard memory ceiling against OOM)
       ├── Flag: --cpus 0.5 (CPU quota against starvation)
       ├── Flag: --pids-limit 64 (Fork bomb mitigation)
       ├── Flag: --read-only (Root filesystem immutable)
-      └── Timeout: 3.0s (Hard process termination)
+      ├── Flag: --tmpfs /tmp:rw,exec,size=64m (Isolated in-memory scratchpad)
+      └── Timeout: 3.0s / 5.0s (Hard process termination)
 ```
 
 ---
@@ -45,25 +46,37 @@ The NEXORA AI Coding Arena sandbox architecture protects host systems, credentia
 1. **Zero Network Egress / Ingress (`--network none`):**
    - Untrusted code cannot perform reverse shells, phone home, scrape local LAN resources, or access backend database ports (`5432`).
 2. **Resource Exhaustion Defense:**
-   - Memory is capped at 128MB.
+   - Memory is capped at 256MB.
    - CPU quota is limited to 0.5 cores.
    - PIDs limit is clamped to 64, preventing fork bombs.
-3. **Immutable Root Filesystem (`--read-only`):**
-   - Student code cannot write persistent files, install malware, or overwrite OS libraries.
-4. **No Volume Mounts:**
-   - No host directories or project workspaces are mounted into the container.
-   - The host `.env`, PostgreSQL connection strings, and application code remain completely inaccessible.
-5. **No Docker Socket Mounting:**
-   - The Docker socket is never mounted into student containers, preventing container breakout / daemon hijacking.
+3. **Filesystem Immutability (`--read-only` + `--tmpfs`):**
+   - The root container filesystem is read-only.
+   - Compilation and execution occur inside an isolated, non-persistent memory tmpfs (`/tmp`).
+   - Host volumes are NEVER mounted into the container.
+4. **Time Limits:**
+   - 3-second hard timeout for production requests.
+5. **Fail-Closed Host Subprocess Prohibition:**
+   - If Docker is offline or disabled, code execution is immediately rejected with an explicit security policy message. Under NO circumstances does the sandbox fall back to host subprocess execution.
 
 ---
 
-## 3. Fail-Closed Boundary Verification
+## 3. Empirical Test Evidence
 
-Automated test evidence in `sandbox/tests/test_sandbox_baseline.py` and `tests/integration/test_phase_5_coding_arena.py`:
-- `test_arbitrary_code_blocked_when_unisolated`: **PASSED**.
-- `test_subprocess_host_fallback_prohibited`: **PASSED**.
-- `test_04_run_custom_input_unisolated_safeguard`: **PASSED**.
-- `test_07_sandbox_security_boundary_enforcement`: **PASSED**.
+| Test Case | Description | Result | Evidence |
+| :--- | :--- | :--- | :--- |
+| **test_python_container_execution** | Python 3.11 inside `python:3.11-alpine` | **PASS** | Exit code 0, status `COMPLETED`, isolation `docker_container` |
+| **test_c_container_execution** | C (GCC) inside `gcc:13-bookworm` | **PASS** | Exit code 0, status `COMPLETED`, isolation `docker_container` |
+| **test_cpp_container_execution** | C++ (G++) inside `gcc:13-bookworm` | **PASS** | Exit code 0, status `COMPLETED`, isolation `docker_container` |
+| **test_java_container_execution** | Java 17 inside `eclipse-temurin:17-alpine` | **PASS** | Exit code 0, status `COMPLETED`, isolation `docker_container` |
+| **test_container_stdin_passing** | Piped stdin through isolated container | **PASS** | Verified stdin parsing and stdout streaming |
+| **test_container_timeout_enforcement** | Infinite while-loop termination | **PASS** | Status `TIME_LIMIT_EXCEEDED`, `is_timeout: true` |
+| **test_network_isolation_enforced** | Outbound socket connection attempt | **PASS** | Network unreachable, socket error caught, zero leak |
+| **test_arbitrary_code_blocked_when_unisolated** | Execution attempted with `SANDBOX_MODE="disabled"` | **PASS** | Status `EXECUTION_BLOCKED_SECURITY_POLICY` |
+| **test_subprocess_host_fallback_prohibited** | Execution attempted with `subprocess_unsafe` | **PASS** | Host fallback refused |
 
-**Verdict:** The sandbox supervisor enforces strict fail-closed isolation. Under no circumstance is untrusted code executed on the Windows host.
+---
+
+## 4. Final Security Determination
+
+All security requirements and isolation boundaries have been empirically validated in live execution.  
+**Phase 5 Sandbox Security Status: VERIFIED & COMPLIANT (FULL GO)**.
