@@ -40,6 +40,9 @@ export function Navbar() {
           <Link href="/coding" className="hover:text-cyber transition-colors">
             Coding Arena
           </Link>
+          <Link href="/copilot" className="hover:text-cyber transition-colors">
+            AI Copilot
+          </Link>
           {isAuthenticated && (
             <>
               {hasRole("STUDENT") && (
