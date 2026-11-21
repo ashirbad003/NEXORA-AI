@@ -49,6 +49,15 @@ export function Navbar() {
           <Link href="/interview" className="hover:text-cyber transition-colors">
             Mock Interview
           </Link>
+          <Link href="/resume" className="hover:text-cyber transition-colors">
+            Resume AI
+          </Link>
+          <Link href="/github" className="hover:text-cyber transition-colors">
+            GitHub IQ
+          </Link>
+          <Link href="/jobs" className="hover:text-cyber transition-colors">
+            Jobs & Kanban
+          </Link>
           {isAuthenticated && (
             <>
               {hasRole("STUDENT") && (

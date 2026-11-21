@@ -16,6 +16,13 @@ from backend.app.models.assessment import (
 from backend.app.models.interview import (
     MockInterviewSession, MockInterviewTurn
 )
+from backend.app.models.phase8_intelligence import (
+    ResumeDocument, GitHubProfileCache, JobOpportunity, JobApplication
+)
+from backend.app.models.phase9_portals import (
+    PlacementDrive, PlacementDriveRegistration, PlacementOffer, StudentPlacementProfile,
+    SystemFeatureFlag, SystemMetricSnapshot
+)
 
 __all__ = [
     "Base", "User", "Role", "user_roles", "StudentProfile", "AdminProfile",
@@ -24,5 +31,8 @@ __all__ = [
     "CodingProblem", "ProblemTestCase", "CodeSubmission", "StudentCodingStats",
     "CopilotCareerPath", "CopilotRoadmap", "CopilotSprintTask", "CopilotConversation", "CopilotMessage",
     "AssessmentTest", "AssessmentQuestion", "AssessmentAttempt", "AssessmentAnswer",
-    "MockInterviewSession", "MockInterviewTurn"
+    "MockInterviewSession", "MockInterviewTurn",
+    "ResumeDocument", "GitHubProfileCache", "JobOpportunity", "JobApplication",
+    "PlacementDrive", "PlacementDriveRegistration", "PlacementOffer", "StudentPlacementProfile",
+    "SystemFeatureFlag", "SystemMetricSnapshot"
 ]
