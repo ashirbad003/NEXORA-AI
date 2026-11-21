@@ -43,6 +43,12 @@ export function Navbar() {
           <Link href="/copilot" className="hover:text-cyber transition-colors">
             AI Copilot
           </Link>
+          <Link href="/assessments" className="hover:text-cyber transition-colors">
+            Assessments
+          </Link>
+          <Link href="/interview" className="hover:text-cyber transition-colors">
+            Mock Interview
+          </Link>
           {isAuthenticated && (
             <>
               {hasRole("STUDENT") && (
