@@ -62,6 +62,7 @@ class StudentProfile(Base):
     skills = Column(Text, nullable=True)  # Comma-separated or JSON string
     career_preferences = Column(Text, nullable=True)
     readiness_score = Column(Integer, default=0, nullable=False)
+    timezone = Column(String(64), default="UTC", nullable=False)
 
     user = relationship("User", back_populates="student_profile")
 

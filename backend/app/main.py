@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -7,7 +8,23 @@ import uuid
 from backend.app.core.config import settings
 from backend.app.core.logging import setup_logging, logger
 from backend.app.schemas.auth import HealthResponse
-from backend.app.api import auth, students, admin, placement, learning, coding, copilot, assessments, interview, resume, github, jobs, placement_cell, admin_intelligence
+from backend.app.api import (
+    auth, students, admin, placement, learning, coding, copilot, assessments,
+    interview, resume, github, jobs, placement_cell, admin_intelligence,
+    revision, peer, notifications
+)
+from backend.app.services.scheduler_service import scheduler
+from backend.app.services.websocket_manager import ws_manager
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup: Start Notification Background Scheduler & WebSocket Event Bus Listener
+    await scheduler.start()
+    await ws_manager.start_listener()
+    yield
+    # Shutdown: Stop Scheduler & Event Bus cleanly
+    await scheduler.stop()
+    await ws_manager.stop_listener()
 
 def create_app() -> FastAPI:
     setup_logging(debug=settings.APP_DEBUG)
@@ -18,7 +35,8 @@ def create_app() -> FastAPI:
         version="1.0.0",
         docs_url="/docs" if settings.APP_DEBUG else None,
         redoc_url="/redoc" if settings.APP_DEBUG else None,
-        openapi_url="/openapi.json" if settings.APP_DEBUG else None
+        openapi_url="/openapi.json" if settings.APP_DEBUG else None,
+        lifespan=lifespan
     )
 
     # CORS Middleware
@@ -71,6 +89,9 @@ def create_app() -> FastAPI:
     app.include_router(jobs.router, prefix=settings.API_V1_STR)
     app.include_router(placement_cell.router, prefix=settings.API_V1_STR)
     app.include_router(admin_intelligence.router, prefix=settings.API_V1_STR)
+    app.include_router(revision.router, prefix=settings.API_V1_STR)
+    app.include_router(peer.router, prefix=settings.API_V1_STR)
+    app.include_router(notifications.router, prefix=settings.API_V1_STR)
 
     # Health Check Endpoints
     @app.get("/health/live", tags=["System"])

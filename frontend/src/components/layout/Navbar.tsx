@@ -58,6 +58,12 @@ export function Navbar() {
           <Link href="/jobs" className="hover:text-cyber transition-colors">
             Jobs & Kanban
           </Link>
+          <Link href="/revision" className="hover:text-cyber transition-colors">
+            Smart Revision
+          </Link>
+          <Link href="/community" className="hover:text-cyber transition-colors">
+            Community
+          </Link>
           {isAuthenticated && (
             <>
               {hasRole("STUDENT") && (

@@ -39,7 +39,9 @@ yarn-error.log*
 *.db
 *.log
 *.dump
+*.sql
 *.sql.gz
+backups/
 
 # Environment & Secrets (NEVER COMMIT)
 .env

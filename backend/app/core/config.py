@@ -37,6 +37,7 @@ class Settings(BaseSettings):
     ARGON2_SALT_LEN: int = Field(default=16)        # 16 bytes salt length
 
     DATABASE_URL: str = Field(default="sqlite+aiosqlite:///./nexora_dev.db")
+    TEST_DATABASE_URL: str = Field(default="sqlite+aiosqlite:///./nexora_test.db")
 
     AI_PROVIDER: str = Field(default="local")
     GEMINI_API_KEY: str = Field(default="")
