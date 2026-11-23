@@ -297,7 +297,9 @@ class RevisionService:
                     ease_factor=payload["ease_factor"],
                     stability=payload["stability"],
                     next_review_at=datetime.fromisoformat(payload["next_review_at"]),
-                    is_replayed=True
+                    is_replayed=True,
+                    is_superseded=payload.get('is_superseded', False),
+                    resulting_state_version=payload.get('resulting_state_version')
                 )
             else:
                 raise HTTPException(
@@ -332,6 +334,75 @@ class RevisionService:
         ).with_for_update()
         review = (await db.execute(lock_stmt)).scalar_one()
 
+        # Phase 11: Server-Acceptance Ordering & Base Version Evaluation
+        current_server_version = getattr(review, "state_version", 1) or 1
+        is_superseded = False
+
+        if req.base_state_version is not None:
+            if req.base_state_version < current_server_version:
+                is_superseded = True
+            elif req.base_state_version > current_server_version:
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail=f"Base state version {req.base_state_version} exceeds current server version {current_server_version}."
+                )
+
+        if is_superseded:
+            # Stale offline review rule: preserve in audit log with is_superseded=True without mutating active state
+            response_payload = {
+                "repetition": review.repetition,
+                "interval_days": review.interval_days,
+                "ease_factor": review.ease_factor,
+                "stability": review.stability,
+                "next_review_at": review.next_review_at.isoformat(),
+                "is_superseded": True,
+                "resulting_state_version": current_server_version
+            }
+
+            log_entry = StudentCardReviewLog(
+                user_id=user_id,
+                card_id=req.card_id,
+                review_id=review.id,
+                session_id=req.session_id,
+                idempotency_key=req.idempotency_key,
+                request_hash=req_hash,
+                submitted_grade=req.grade,
+                time_spent_ms=req.time_spent_ms,
+                prev_repetition=review.repetition,
+                new_repetition=review.repetition,
+                prev_interval=review.interval_days,
+                new_interval=review.interval_days,
+                prev_ease_factor=review.ease_factor,
+                new_ease_factor=review.ease_factor,
+                prev_stability=review.stability,
+                new_stability=review.stability,
+                prev_next_review_at=review.next_review_at,
+                new_next_review_at=review.next_review_at,
+                response_payload=response_payload,
+                reviewed_at=now,
+                client_reviewed_at=req.client_reviewed_at,
+                device_id=req.device_id,
+                is_superseded=True,
+                base_state_version=req.base_state_version,
+                resulting_state_version=current_server_version
+            )
+            db.add(log_entry)
+            await db.flush()
+
+            return CardReviewSubmitResponse(
+                idempotency_key=req.idempotency_key,
+                card_id=req.card_id,
+                submitted_grade=req.grade,
+                repetition=review.repetition,
+                interval_days=review.interval_days,
+                ease_factor=review.ease_factor,
+                stability=review.stability,
+                next_review_at=review.next_review_at,
+                is_replayed=False,
+                is_superseded=True,
+                resulting_state_version=current_server_version
+            )
+
         # 5. Capture EXACT PREVIOUS VALUES before mutation
         prev_rep = review.repetition
         prev_interval = review.interval_days
@@ -349,20 +420,23 @@ class RevisionService:
             review_time=now
         )
 
-        # 7. Mutate current review record
+        # 7. Mutate current review record & increment state_version
         review.repetition = calc.repetition
         review.interval_days = calc.interval_days
         review.ease_factor = calc.ease_factor
         review.stability = calc.stability
         review.next_review_at = calc.next_review_at
         review.last_reviewed_at = now
+        review.state_version = current_server_version + 1
 
         response_payload = {
             "repetition": calc.repetition,
             "interval_days": calc.interval_days,
             "ease_factor": calc.ease_factor,
             "stability": calc.stability,
-            "next_review_at": calc.next_review_at.isoformat()
+            "next_review_at": calc.next_review_at.isoformat(),
+            "is_superseded": False,
+            "resulting_state_version": review.state_version
         }
 
         # 8. Insert immutable audit log
@@ -386,9 +460,28 @@ class RevisionService:
             prev_next_review_at=prev_next_review_at,
             new_next_review_at=calc.next_review_at,
             response_payload=response_payload,
-            reviewed_at=now
+            reviewed_at=now,
+            client_reviewed_at=req.client_reviewed_at,
+            device_id=req.device_id,
+            is_superseded=False,
+            base_state_version=req.base_state_version,
+            resulting_state_version=review.state_version
         )
         db.add(log_entry)
+
+        # Append to Sync Change Feed if sync service is available
+        try:
+            from backend.app.services.sync_service import SyncService
+            await SyncService.append_change_event(
+                db=db,
+                user_id=user_id,
+                entity_type="CARD_REVIEW",
+                entity_id=req.card_id,
+                operation="UPSERT",
+                payload=response_payload
+            )
+        except Exception as e:
+            logger.warning(f"Sync change feed append skipped: {e}")
 
         # 9. Update focus session card count if session_id provided
         if req.session_id:
@@ -411,7 +504,9 @@ class RevisionService:
             ease_factor=calc.ease_factor,
             stability=calc.stability,
             next_review_at=calc.next_review_at,
-            is_replayed=False
+            is_replayed=False,
+            is_superseded=False,
+            resulting_state_version=review.state_version
         )
 
     # --- Heatmap and Dashboard Analytics ---

@@ -84,6 +84,9 @@ class CardReviewSubmitRequest(BaseModel):
     session_id: Optional[str] = None
     time_spent_ms: int = Field(default=0, ge=0)
     user_timezone: Optional[str] = "UTC"
+    base_state_version: Optional[int] = Field(None, description="Current card state version known to the client")
+    device_id: Optional[str] = Field(None, max_length=100, description="Device UUID performing review")
+    client_reviewed_at: Optional[datetime] = Field(None, description="Client timestamp for offline review")
 
 class CardReviewSubmitResponse(BaseModel):
     idempotency_key: str
@@ -95,6 +98,8 @@ class CardReviewSubmitResponse(BaseModel):
     stability: float
     next_review_at: datetime
     is_replayed: bool = False
+    is_superseded: bool = False
+    resulting_state_version: Optional[int] = None
 
 # --- Focus Session Schemas ---
 class FocusSessionStartRequest(BaseModel):

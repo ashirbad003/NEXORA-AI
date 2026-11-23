@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime, timezone
 from sqlalchemy import (
-    Column, String, Boolean, DateTime, ForeignKey, Text, Integer, Float, Index, UniqueConstraint
+    Column, String, Boolean, DateTime, ForeignKey, Text, Integer, Float, Index, UniqueConstraint, BigInteger
 )
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
@@ -57,6 +57,7 @@ class StudentCardReview(Base):
     stability = Column(Float, nullable=False, default=1.00)
     next_review_at = Column(DateTime(timezone=True), nullable=False, index=True)
     last_reviewed_at = Column(DateTime(timezone=True), nullable=True)
+    state_version = Column(BigInteger, nullable=False, default=1)
 
     __table_args__ = (
         UniqueConstraint("user_id", "card_id", name="uq_student_card_reviews_user_card"),
@@ -94,6 +95,11 @@ class StudentCardReviewLog(Base):
 
     response_payload = Column(JSONB, nullable=False)
     reviewed_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False, index=True)
+    client_reviewed_at = Column(DateTime(timezone=True), nullable=True)
+    device_id = Column(String(100), nullable=True)
+    is_superseded = Column(Boolean, nullable=False, default=False)
+    base_state_version = Column(BigInteger, nullable=True)
+    resulting_state_version = Column(BigInteger, nullable=True)
 
     __table_args__ = (
         UniqueConstraint("user_id", "idempotency_key", name="uq_review_logs_user_idempotency"),

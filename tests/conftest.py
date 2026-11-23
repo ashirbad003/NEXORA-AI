@@ -19,12 +19,21 @@ os.environ["DATABASE_URL"] = effective_test_url
 settings.DATABASE_URL = effective_test_url
 
 # Recreate the underlying SQLAlchemy engine and AsyncSessionLocal bound to test database
+# In test environments, NullPool is essential for PostgreSQL+asyncpg to prevent
+# asyncpg connection pooling across closed asyncio event loops in multi-test runs
+# (e.g. unittest.IsolatedAsyncioTestCase on Windows ProactorEventLoop).
 try:
-    from backend.app.db.session import create_async_engine, get_engine_args
+    from backend.app.db.session import create_async_engine
+    from sqlalchemy.pool import NullPool
     from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncSession
     import backend.app.db.session as session_module
 
-    new_engine = create_async_engine(effective_test_url, **get_engine_args())
+    new_engine = create_async_engine(
+        effective_test_url,
+        echo=settings.APP_DEBUG,
+        future=True,
+        poolclass=NullPool
+    )
     session_module.engine = new_engine
     session_module.AsyncSessionLocal = async_sessionmaker(
         bind=new_engine,

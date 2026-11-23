@@ -33,6 +33,9 @@ from backend.app.models.phase10_peer import (
 from backend.app.models.phase10_notifications import (
     UserNotification, UserNotificationPreference
 )
+from backend.app.models.phase11_sync import (
+    MobileDeviceToken, UserSyncCounter, UserSyncWatermark, UserSyncChangeFeed, UserSyncTombstone
+)
 
 __all__ = [
     "Base", "User", "Role", "user_roles", "StudentProfile", "AdminProfile",
@@ -49,5 +52,7 @@ __all__ = [
     "FlashcardDeck", "FlashcardItem", "StudentCardReview", "StudentCardReviewLog",
     "MistakeNotebookEntry", "RevisionFocusSession",
     "PeerDiscussionThread", "PeerDiscussionReply", "PeerStudyGroup", "PeerStudyGroupMember",
-    "UserNotification", "UserNotificationPreference"
+    "UserNotification", "UserNotificationPreference",
+    # Phase 11
+    "MobileDeviceToken", "UserSyncCounter", "UserSyncWatermark", "UserSyncChangeFeed", "UserSyncTombstone"
 ]

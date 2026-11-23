@@ -11,7 +11,7 @@ from backend.app.schemas.auth import HealthResponse
 from backend.app.api import (
     auth, students, admin, placement, learning, coding, copilot, assessments,
     interview, resume, github, jobs, placement_cell, admin_intelligence,
-    revision, peer, notifications
+    revision, peer, notifications, sync
 )
 from backend.app.services.scheduler_service import scheduler
 from backend.app.services.websocket_manager import ws_manager
@@ -92,6 +92,7 @@ def create_app() -> FastAPI:
     app.include_router(revision.router, prefix=settings.API_V1_STR)
     app.include_router(peer.router, prefix=settings.API_V1_STR)
     app.include_router(notifications.router, prefix=settings.API_V1_STR)
+    app.include_router(sync.router, prefix=settings.API_V1_STR)
 
     # Health Check Endpoints
     @app.get("/health/live", tags=["System"])
