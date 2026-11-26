@@ -1,6 +1,6 @@
 from typing import List, Optional, Dict, Any
 from datetime import datetime
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 # --- Discussion Threads ---
 class ThreadCreate(BaseModel):
@@ -11,6 +11,8 @@ class ThreadCreate(BaseModel):
     context_id: Optional[str] = None
 
 class ThreadResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     user_id: str
     author_name: str
@@ -26,15 +28,14 @@ class ThreadResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        from_attributes = True
-
 # --- Discussion Replies ---
 class ReplyCreate(BaseModel):
     content: str = Field(..., min_length=2)
     code_snippet: Optional[str] = None
 
 class ReplyResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     thread_id: str
     user_id: str
@@ -46,9 +47,6 @@ class ReplyResponse(BaseModel):
     status: str
     created_at: datetime
 
-    class Config:
-        from_attributes = True
-
 # --- Study Groups ---
 class StudyGroupCreate(BaseModel):
     name: str = Field(..., min_length=3, max_length=200)
@@ -57,6 +55,8 @@ class StudyGroupCreate(BaseModel):
     is_private: bool = False
 
 class StudyGroupResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     creator_id: str
     name: str
@@ -67,9 +67,6 @@ class StudyGroupResponse(BaseModel):
     member_count: int
     is_member: bool = False
     created_at: datetime
-
-    class Config:
-        from_attributes = True
 
 class PeerLeaderboardEntry(BaseModel):
     user_id: str

@@ -307,10 +307,23 @@ class RevisionService:
                     detail="Idempotency key reused with conflicting request payload."
                 )
 
-        # 2. Verify card exists
-        card = (await db.execute(select(FlashcardItem).where(FlashcardItem.id == req.card_id))).scalar_one_or_none()
-        if not card:
-            raise HTTPException(status_code=404, detail="Card not found")
+        # 2. Verify card exists and is accessible by user (deck ownership or public approved)
+        card_stmt = (
+            select(FlashcardItem, FlashcardDeck)
+            .join(FlashcardDeck, FlashcardItem.deck_id == FlashcardDeck.id)
+            .where(
+                FlashcardItem.id == req.card_id,
+                FlashcardDeck.is_archived == False,
+                or_(
+                    FlashcardDeck.user_id == user_id,
+                    and_(FlashcardDeck.is_public == True, FlashcardDeck.is_approved == True)
+                )
+            )
+        )
+        card_row = (await db.execute(card_stmt)).first()
+        if not card_row:
+            raise HTTPException(status_code=404, detail="Card not found or access denied")
+        card, deck = card_row
 
         # 3. Pre-seed review record atomically using ON CONFLICT DO NOTHING to handle first review concurrency
         preseed_stmt = insert(StudentCardReview).values(

@@ -71,3 +71,24 @@ def guard_test_database_isolation():
     )
 
     yield
+
+@pytest.fixture(scope="session", autouse=True)
+def init_test_database_schema(guard_test_database_isolation):
+    """
+    Ensure all models in Base.metadata are cleanly created in the isolated test database
+    before running tests, so tests relying on AsyncSessionLocal have tables available.
+    """
+    import asyncio
+    import backend.app.models
+    from backend.app.db.session import Base
+    import backend.app.db.session as session_module
+
+    async def _init_tables():
+        async with session_module.engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+
+    try:
+        asyncio.run(_init_tables())
+    except Exception as exc:
+        pass
+    yield

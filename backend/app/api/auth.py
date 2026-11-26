@@ -9,6 +9,7 @@ from backend.app.schemas.user import (
 from backend.app.services.auth_service import AuthService
 from backend.app.api.deps import get_current_user
 from backend.app.models.auth import User
+from backend.app.core.rate_limiter import rate_limiter
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
@@ -18,6 +19,7 @@ async def register_student(
     request: Request,
     session: AsyncSession = Depends(get_db_session)
 ):
+    await rate_limiter.check_rate_limit(request, key_prefix="auth_register", limit=30, window_seconds=60)
     client_ip = request.client.host if request.client else None
     user = await AuthService.register_student(session, req, ip_address=client_ip)
     await session.commit()
@@ -29,6 +31,7 @@ async def login(
     request: Request,
     session: AsyncSession = Depends(get_db_session)
 ):
+    await rate_limiter.check_rate_limit(request, key_prefix="auth_login", limit=60, window_seconds=60)
     client_ip = request.client.host if request.client else None
     user, access_token, refresh_token = await AuthService.authenticate_user(session, req, ip_address=client_ip)
     await session.commit()
@@ -47,6 +50,7 @@ async def refresh_tokens(
     request: Request,
     session: AsyncSession = Depends(get_db_session)
 ):
+    await rate_limiter.check_rate_limit(request, key_prefix="auth_refresh", limit=120, window_seconds=60)
     client_ip = request.client.host if request.client else None
     user, new_access, new_refresh = await AuthService.refresh_tokens(session, req.refresh_token, ip_address=client_ip)
     await session.commit()

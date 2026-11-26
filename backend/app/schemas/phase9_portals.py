@@ -1,5 +1,5 @@
 from typing import List, Optional, Dict, Any
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from datetime import datetime
 
 # ==========================================
@@ -19,6 +19,8 @@ class PlacementDriveCreateRequest(BaseModel):
     description: str
 
 class PlacementDriveResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     company_name: str
     role_title: str
@@ -33,13 +35,12 @@ class PlacementDriveResponse(BaseModel):
     description: str
     created_at: datetime
 
-    class Config:
-        from_attributes = True
-
 class DriveRegisterRequest(BaseModel):
     drive_id: str
 
 class DriveRegistrationResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     drive_id: str
     student_id: str
@@ -49,9 +50,6 @@ class DriveRegistrationResponse(BaseModel):
     interview_slot: Optional[str] = None
     tpo_notes: Optional[str] = None
     created_at: datetime
-
-    class Config:
-        from_attributes = True
 
 class RegistrationStatusUpdateRequest(BaseModel):
     status: str = Field(..., description="Pending, Approved, Rejected, Shortlisted, Selected")
@@ -68,6 +66,8 @@ class OfferCreateRequest(BaseModel):
     offer_letter_url: Optional[str] = None
 
 class OfferResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     drive_id: str
     student_id: str
@@ -78,10 +78,9 @@ class OfferResponse(BaseModel):
     status: str
     offered_at: datetime
 
-    class Config:
-        from_attributes = True
-
 class StudentPlacementProfileResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     student_id: str
     is_blacklisted: bool
@@ -92,9 +91,6 @@ class StudentPlacementProfileResponse(BaseModel):
     highest_offer_lpa: float
     created_at: datetime
     updated_at: datetime
-
-    class Config:
-        from_attributes = True
 
 class BlacklistUpdateRequest(BaseModel):
     is_blacklisted: bool
@@ -125,6 +121,8 @@ class FeatureFlagUpdateRequest(BaseModel):
     description: Optional[str] = None
 
 class FeatureFlagResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     flag_key: str
     name: str
@@ -132,9 +130,6 @@ class FeatureFlagResponse(BaseModel):
     is_enabled: bool
     updated_by: Optional[str] = None
     updated_at: datetime
-
-    class Config:
-        from_attributes = True
 
 class SystemHealthTelemetry(BaseModel):
     status: str

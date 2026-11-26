@@ -1,5 +1,5 @@
 from typing import Dict, Any, List
-from datetime import datetime
+from datetime import datetime, timezone
 
 class TokenTelemetryTracker:
     """
@@ -29,7 +29,7 @@ class TokenTelemetryTracker:
             (tokens_completion / 1000.0) * self.COST_PER_1K_OUTPUT_USD
         )
         record = {
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "user_id": user_id,
             "action": action,
             "provider": provider,

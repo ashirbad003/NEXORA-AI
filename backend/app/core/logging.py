@@ -15,6 +15,14 @@ class JSONFormatter(logging.Formatter):
         }
         if hasattr(record, "request_id"):
             log_entry["request_id"] = record.request_id
+        else:
+            try:
+                from backend.app.core.telemetry import request_id_ctx
+                ctx_id = request_id_ctx.get()
+                if ctx_id:
+                    log_entry["request_id"] = ctx_id
+            except Exception:
+                pass
         if record.exc_info:
             log_entry["exception"] = self.formatException(record.exc_info)
         return json.dumps(log_entry)

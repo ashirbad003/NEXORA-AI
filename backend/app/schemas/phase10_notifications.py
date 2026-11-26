@@ -1,9 +1,11 @@
 from typing import List, Optional, Dict, Any
 from datetime import datetime
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 # --- User Notifications ---
 class NotificationResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     user_id: str
     category: str
@@ -16,9 +18,6 @@ class NotificationResponse(BaseModel):
     read_at: Optional[datetime] = None
     created_at: datetime
 
-    class Config:
-        from_attributes = True
-
 class NotificationPreferencesUpdate(BaseModel):
     in_app_enabled: Optional[bool] = None
     email_enabled: Optional[bool] = None
@@ -28,6 +27,8 @@ class NotificationPreferencesUpdate(BaseModel):
     quiet_hours_end: Optional[str] = None
 
 class NotificationPreferencesResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     user_id: str
     in_app_enabled: bool
     email_enabled: bool
@@ -35,9 +36,6 @@ class NotificationPreferencesResponse(BaseModel):
     category_overrides: Dict[str, Any]
     quiet_hours_start: Optional[str] = None
     quiet_hours_end: Optional[str] = None
-
-    class Config:
-        from_attributes = True
 
 class NotificationCreateInternal(BaseModel):
     user_id: str

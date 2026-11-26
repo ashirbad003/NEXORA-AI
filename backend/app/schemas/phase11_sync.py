@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import List, Optional, Any, Dict
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 
 # ==========================================
@@ -16,6 +16,8 @@ class DeviceTokenRegisterRequest(BaseModel):
 
 
 class DeviceTokenResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     user_id: str
     device_id: str
@@ -26,9 +28,6 @@ class DeviceTokenResponse(BaseModel):
     is_active: bool
     created_at: datetime
     last_used_at: datetime
-
-    class Config:
-        from_attributes = True
 
 
 # ==========================================
@@ -44,7 +43,7 @@ class SyncPushOperation(BaseModel):
 
 class SyncPushRequest(BaseModel):
     device_id: str = Field(..., min_length=1, max_length=100)
-    operations: List[SyncPushOperation] = Field(..., max_items=50)
+    operations: List[SyncPushOperation] = Field(..., max_length=50)
 
 
 class SyncOperationResult(BaseModel):

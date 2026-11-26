@@ -1,5 +1,5 @@
 from typing import List, Optional, Dict, Any
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from datetime import datetime
 
 # ==========================================
@@ -21,6 +21,8 @@ class ResumeUpdateRequest(BaseModel):
     is_primary: Optional[bool] = None
 
 class ResumeResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     student_id: str
     title: str
@@ -32,9 +34,6 @@ class ResumeResponse(BaseModel):
     is_primary: bool
     created_at: datetime
     updated_at: datetime
-
-    class Config:
-        from_attributes = True
 
 class ATSAnalysisResponse(BaseModel):
     resume_id: str
@@ -78,6 +77,8 @@ class RepositoryHealth(BaseModel):
     recommendations: List[str] = []
 
 class GitHubProfileResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     student_id: str
     github_username: str
@@ -87,9 +88,6 @@ class GitHubProfileResponse(BaseModel):
     repository_health_metrics: List[RepositoryHealth]
     recommendations: List[str]
     last_scanned_at: datetime
-
-    class Config:
-        from_attributes = True
 
 # ==========================================
 # MODULE L: JOBS & INTERNSHIPS INTELLIGENCE (FEAT-217 to FEAT-234)
@@ -108,6 +106,8 @@ class JobOpportunityCreateRequest(BaseModel):
     application_url: str = "#"
 
 class JobOpportunityResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     company_name: str
     role_title: str
@@ -122,15 +122,14 @@ class JobOpportunityResponse(BaseModel):
     created_at: datetime
     match_score: Optional[float] = None  # Calculated dynamically for student
 
-    class Config:
-        from_attributes = True
-
 class ApplicationStatusUpdateRequest(BaseModel):
     status: str = Field(..., description="Wishlist, Applied, Interview, Offer, Rejected")
     interview_date: Optional[datetime] = None
     notes: Optional[str] = None
 
 class JobApplicationResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     job_id: str
     student_id: str
@@ -141,9 +140,6 @@ class JobApplicationResponse(BaseModel):
     notes: Optional[str] = None
     created_at: datetime
     updated_at: datetime
-
-    class Config:
-        from_attributes = True
 
 class ColdEmailDraftRequest(BaseModel):
     job_id: str

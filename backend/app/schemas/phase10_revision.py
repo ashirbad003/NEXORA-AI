@@ -1,6 +1,6 @@
 from typing import List, Optional, Dict, Any
 from datetime import datetime
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 # --- Deck Schemas ---
 class FlashcardDeckCreate(BaseModel):
@@ -19,6 +19,8 @@ class FlashcardDeckUpdate(BaseModel):
     is_archived: Optional[bool] = None
 
 class FlashcardDeckResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     user_id: str
     title: str
@@ -34,9 +36,6 @@ class FlashcardDeckResponse(BaseModel):
     due_card_count: int = 0
     created_at: datetime
     updated_at: datetime
-
-    class Config:
-        from_attributes = True
 
 # --- Card Schemas ---
 class FlashcardItemCreate(BaseModel):
@@ -56,6 +55,8 @@ class FlashcardItemUpdate(BaseModel):
     order_index: Optional[int] = None
 
 class FlashcardItemResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     deck_id: str
     prompt: str
@@ -72,9 +73,6 @@ class FlashcardItemResponse(BaseModel):
     stability: Optional[float] = 1.00
     next_review_at: Optional[datetime] = None
     is_due: bool = True
-
-    class Config:
-        from_attributes = True
 
 # --- Review Submission Schemas ---
 class CardReviewSubmitRequest(BaseModel):
@@ -112,6 +110,8 @@ class FocusSessionHeartbeatRequest(BaseModel):
     status: str = "IN_PROGRESS"  # IN_PROGRESS, COMPLETED, ABORTED
 
 class FocusSessionResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     user_id: str
     deck_id: Optional[str] = None
@@ -121,9 +121,6 @@ class FocusSessionResponse(BaseModel):
     status: str
     started_at: datetime
     ended_at: Optional[datetime] = None
-
-    class Config:
-        from_attributes = True
 
 # --- Mistake Notebook Schemas ---
 class MistakeEntryCreate(BaseModel):
@@ -137,6 +134,8 @@ class MistakeEntryCreate(BaseModel):
     tags: List[str] = Field(default_factory=list)
 
 class MistakeEntryResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     user_id: str
     source_type: str
@@ -150,9 +149,6 @@ class MistakeEntryResponse(BaseModel):
     is_resolved: bool
     resolved_at: Optional[datetime] = None
     created_at: datetime
-
-    class Config:
-        from_attributes = True
 
 # --- Heatmap and Stats Schemas ---
 class HeatmapDayStat(BaseModel):
